@@ -1,3 +1,3 @@
-module github.com/workshops/calendar
+module github.com/Selepok/calendar
 
 go 1.17

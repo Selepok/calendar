@@ -1,7 +1,7 @@
 SHALL=/bin/bash
 
 export CGO_ENABLED=0
-export DSN=psql://gouser:gopassword@localhost:5432/gotest
+export DSN=postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable
 
 default: build
 .PHONY: default
@@ -20,3 +20,13 @@ lint:
 	@ echo "-> running linters ..."
 	@ golangci-lint run ./...
 .PHONY: lint
+
+migrate:
+	@ echo "-> running migration ..."
+	@ migrate -path ./migrations -database "postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable" -verbose up
+.PHONY: migrate
+
+migrate-down:
+	@ echo "-> running migration ..."
+	@ migrate -path ./migrations -database "postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable" -verbose down
+.PHONY: migrate-down
