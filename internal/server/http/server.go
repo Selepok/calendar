@@ -1,19 +1,27 @@
 package http
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Validator interface {
 	Validate(interface{}) error
 }
 
-type Server struct {
-	valid Validator
+type Service interface {
 }
 
-func NewServer(valid Validator) *Server {
-	return &Server{valid: valid}
+type Server struct {
+	valid    Validator
+	calendar Service
+}
+
+func NewServer(valid Validator, calendar Service) *Server {
+	return &Server{valid: valid, calendar: calendar}
 }
 
 func (s *Server) HandlerA(w http.ResponseWriter, r *http.Request) {
-
+	// TODO: unmarshall
+	// TODO: validate
+	// TODO call service
 }

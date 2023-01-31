@@ -1,5 +1,5 @@
 SHALL=/bin/bash
-
+include .env
 export CGO_ENABLED=0
 export DSN=postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable
 
@@ -23,10 +23,10 @@ lint:
 
 migrate:
 	@ echo "-> running migration ..."
-	@ migrate -path ./migrations -database "postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable" -verbose up
+	@ migrate -path ./migrations -database $(DSN) -verbose up
 .PHONY: migrate
 
 migrate-down:
 	@ echo "-> running migration ..."
-	@ migrate -path ./migrations -database "postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable" -verbose down
+	@ migrate -path ./migrations -database $(DSN) -verbose down
 .PHONY: migrate-down
