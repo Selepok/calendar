@@ -2,7 +2,10 @@ package postgre
 
 import (
 	"database/sql"
+	"fmt"
+	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 type Repository struct {
@@ -11,6 +14,9 @@ type Repository struct {
 
 func NewRepository(dsn string) *Repository {
 	// create connection
+	dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DATABASE_URL"), os.Getenv("DB_PORT"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_DATABASE"))
+
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatal(err)
@@ -23,4 +29,23 @@ func NewRepository(dsn string) *Repository {
 	return &Repository{db}
 }
 
+func (repo Repository) CreateUser(login, password, timezone string) error {
+	if _, err := repo.db.Exec("insert into users values ($1, $2, $3)", login, password, timezone); err != nil {
+		// If there is any issue with inserting into the database, return a 500 error
+		return err
+	}
+	return nil
+}
 
+func (repo Repository) GetUserHashedPassword(login string) (hashedPassword string, err error) {
+	// Get the existing entry present in the database for the given username
+	row := repo.db.QueryRow("SELECT password FROM users WHERE login=$1", login)
+
+	err = row.Scan(&hashedPassword)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return hashedPassword, nil
+}

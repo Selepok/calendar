@@ -1,7 +1,6 @@
 SHALL=/bin/bash
 include .env
 export CGO_ENABLED=0
-export DSN=postgres://gouser:gopassword@localhost:4321/gotest?sslmode=disable
 
 default: build
 .PHONY: default
@@ -22,7 +21,7 @@ lint:
 .PHONY: lint
 
 migrate:
-	@ echo "-> running migration ..."
+	@ echo "-> running migration ...$(DSN)"
 	@ migrate -path ./migrations -database $(DSN) -verbose up
 .PHONY: migrate
 

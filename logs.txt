@@ -1,0 +1,46 @@
+2023/02/07 17:40:02 pq: column "username" does not exist
+2023/02/09 15:33:09 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 15:36:21 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 15:40:33 Executing Auth middleware
+2023/02/09 15:40:33 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 15:40:33 Executing Auth middleware again
+2023/02/09 15:40:35 Executing Auth middleware
+2023/02/09 15:40:35 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 15:40:35 Executing Auth middleware again
+2023/02/09 15:40:39 Executing Auth middleware
+2023/02/09 15:40:47 Executing Auth middleware
+2023/02/09 15:40:47 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 15:40:47 Executing Auth middleware again
+2023/02/09 15:40:57 Executing Auth middleware
+2023/02/09 15:40:59 Executing Auth middleware
+2023/02/09 15:41:03 Executing Auth middleware
+2023/02/09 17:28:27 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 17:28:40 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:30:24 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:30:28 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:30:29 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:31:01 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:31:02 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:31:43 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:34:04 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:35:09 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 17:35:20 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:36:07 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:36:15 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 17:36:31 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:36:56 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 17:37:09 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:37:18 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 17:37:28 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:37:50 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:37:54 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Login (server.go:87)
+2023/02/09 17:38:06 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/server/http.(*Server).Test (server.go:93)
+2023/02/09 17:41:16 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:43:32 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:44:33 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:44:35 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:53:55 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:53:57 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:53:59 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:54:02 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
+2023/02/09 17:54:09 http: superfluous response.WriteHeader call from github.com/Selepok/calendar/internal/middleware/auth.Auth.func1 (auth.go:28)
