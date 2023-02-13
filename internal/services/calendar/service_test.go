@@ -26,24 +26,28 @@ func (r RepositoryMock) CreateUser(login, password, timezone string) error {
 }
 
 func (r RepositoryMock) GetUserHashedPassword(login string) (hashedPassword string, err error) {
-	if login == correctUser || login == tokenFailsUser {
+	switch login {
+	case correctUser, tokenFailsUser:
 		return correctHash, nil
-	} else if login == incorrectUser {
+	case incorrectUser:
 		return incorrectHash, nil
+	default:
+		return "", errors2.NoUserFound(login)
 	}
-	return "", errors2.NoUserFound(login)
 }
 
 type JwtMock struct {
 }
 
 func (jw *JwtMock) GenerateToken(login string) (tokenString string, err error) {
-	if login == correctUser {
+	switch login {
+	case correctUser:
 		return correctToken, nil
-	} else if login == tokenFailsUser {
+	case tokenFailsUser:
 		return tokenString, errors2.GenerateTokenIssue{}
+	default:
+		return
 	}
-	return
 }
 func (jw *JwtMock) ValidateToken(string) error {
 	return nil
@@ -101,11 +105,11 @@ func TestLogin(t *testing.T) {
 			token, err := service.Login(user, jwt)
 
 			if token != tt.token {
-				t.Errorf("token should be empty on error")
+				t.Errorf("token is wrong, got %q want %q", token, tt.token)
 			}
 
 			if !errors.Is(err, tt.error) {
-				t.Errorf("wrong error message")
+				t.Errorf("error is worng, got '%T' want '%T'", err, tt.error)
 			}
 		})
 	}
