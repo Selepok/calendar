@@ -2,8 +2,8 @@ package postgre
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	errors2 "github.com/Selepok/calendar/internal/errors"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
@@ -43,7 +43,7 @@ func (repo Repository) GetUserHashedPassword(login string) (hashedPassword strin
 
 	err = row.Scan(&hashedPassword)
 	if err == sql.ErrNoRows {
-		return "", errors.New(fmt.Sprintf("There is no user with login: %s.", login))
+		return "", errors2.NoUserFound(login)
 	} else if err != nil {
 		log.Println(err)
 		return

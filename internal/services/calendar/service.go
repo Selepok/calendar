@@ -1,11 +1,9 @@
 package calendar
 
 import (
+	errors2 "github.com/Selepok/calendar/internal/errors"
 	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
-	"os"
-	"strconv"
-
 	//"github.com/Selepok/calendar/internal/repository/postgre"
 	"github.com/Selepok/calendar/internal/server/http"
 	"golang.org/x/crypto/bcrypt"
@@ -38,7 +36,7 @@ func (s *Service) CreateUser(credentials http.Credentials) error {
 	return nil
 }
 
-func (s *Service) Login(credentials model.Auth) (token string, err error) {
+func (s *Service) Login(credentials model.Auth, jwt auth.Auth) (token string, err error) {
 	hashedPassword, err := s.repo.GetUserHashedPassword(credentials.Login)
 	if err != nil {
 		return
@@ -46,22 +44,12 @@ func (s *Service) Login(credentials model.Auth) (token string, err error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(credentials.Password))
 	if err != nil {
-		return
+		return token, errors2.IncorrectPassword(credentials.Login)
 	}
 
-	expirationMinutes, err := strconv.ParseInt(os.Getenv("TOKEN_EXPIRATION_TIME_IN_MINUTES"), 10, 64)
-	if err != nil {
-		//w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	jwt := auth.JwtWrapper{
-		SecretKey:         os.Getenv("SECRET_KEY"),
-		ExpirationMinutes: expirationMinutes,
-	}
 	token, err = jwt.GenerateToken(credentials.Login)
 	if err != nil {
-		//w.WriteHeader(http.StatusInternalServerError)
-		return
+		return token, errors2.GenerateTokenIssue{}
 	}
 
 	return

@@ -18,15 +18,14 @@ type Auth interface {
 // JwtWrapper wraps the signing key and the issuer
 type JwtWrapper struct {
 	SecretKey         string
-	Issuer            string
 	ExpirationMinutes int64
 }
 
-func (jw *JwtWrapper) GenerateToken(username string) (tokenString string, err error) {
+func (jw *JwtWrapper) GenerateToken(login string) (tokenString string, err error) {
 	expirationTime := time.Now().Add(time.Minute * time.Duration(jw.ExpirationMinutes))
 	// Create the JWT claims, which includes the username and expiry time
 	claims := &Claims{
-		Username: username,
+		Username: login,
 		RegisteredClaims: jwt.RegisteredClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: jwt.NewNumericDate(expirationTime),

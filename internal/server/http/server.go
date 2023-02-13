@@ -2,11 +2,14 @@ package http
 
 import (
 	"encoding/json"
+	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
 	"github.com/Selepok/calendar/internal/response"
 	"github.com/Selepok/calendar/internal/services/validator"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 type Validator interface {
@@ -15,7 +18,7 @@ type Validator interface {
 
 type Service interface {
 	CreateUser(credentials Credentials) error
-	Login(model.Auth) (string, error)
+	Login(model.Auth, auth.Auth) (string, error)
 }
 
 type Server struct {
@@ -62,7 +65,16 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.calendar.Login(user)
+	expirationMinutes, err := strconv.ParseInt(os.Getenv("TOKEN_EXPIRATION_TIME_IN_MINUTES"), 10, 64)
+	if err != nil {
+		return
+	}
+	jwt := &auth.JwtWrapper{
+		SecretKey:         os.Getenv("SECRET_KEY"),
+		ExpirationMinutes: expirationMinutes,
+	}
+
+	token, err := s.calendar.Login(user, jwt)
 	if err != nil {
 		response.Respond(w, http.StatusUnauthorized, response.Error{Error: err.Error()})
 		return
