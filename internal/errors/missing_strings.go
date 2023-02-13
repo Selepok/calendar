@@ -16,6 +16,13 @@ func (e NoUserFound) Error() string {
 	return fmt.Sprintf("There is no user with login: %s.", string(e))
 }
 
+type UserCreationIssue struct {
+}
+
+func (e UserCreationIssue) Error() string {
+	return "Something went wrong while creating user."
+}
+
 type IncorrectPassword string
 
 func (e IncorrectPassword) Error() string {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	errors2 "github.com/Selepok/calendar/internal/errors"
 	"github.com/Selepok/calendar/internal/model"
+	"github.com/Selepok/calendar/internal/server/http"
 	"testing"
 )
 
@@ -12,6 +13,7 @@ const (
 	correctHash       = "$2a$08$SLcWO3xeVzk0Z6.lNreRhuRf7YSeXT9RlfrVDBf96coxKbZYfobW6"
 	correctPassword   = "testpassword"
 	correctToken      = "correct_token"
+	correctTimezone   = "Europe/Kyiv"
 	incorrectUser     = "incorrect"
 	incorrectPassword = "incorrect_password"
 	incorrectHash     = "$2a$08$SLcWO3xeVzk0Z6.lNreRhuRf7YSeXT9RlfrVDBf96coxKbZYfoeee"
@@ -22,7 +24,11 @@ type RepositoryMock struct {
 }
 
 func (r RepositoryMock) CreateUser(login, password, timezone string) error {
-	return nil
+	if login == correctUser && timezone == correctTimezone {
+		return nil
+	}
+
+	return errors2.UserCreationIssue{}
 }
 
 func (r RepositoryMock) GetUserHashedPassword(login string) (hashedPassword string, err error) {
@@ -51,6 +57,47 @@ func (jw *JwtMock) GenerateToken(login string) (tokenString string, err error) {
 }
 func (jw *JwtMock) ValidateToken(string) error {
 	return nil
+}
+
+func TestCreateUser(t *testing.T) {
+	repository := RepositoryMock{}
+	service := Service{repository}
+
+	tests := []struct {
+		name     string
+		password string
+		login    string
+		timezone string
+		error    error
+	}{
+		{
+			name:     "User create success",
+			password: correctPassword,
+			login:    correctUser,
+			timezone: correctTimezone,
+			error:    nil,
+		},
+		{
+			name:     "User create error",
+			password: incorrectPassword,
+			login:    incorrectUser,
+			timezone: "",
+			error:    errors2.UserCreationIssue{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			creds := http.Credentials{
+				Password: tt.password,
+				Login:    tt.login,
+				Timezone: tt.timezone,
+			}
+			err := service.CreateUser(creds)
+			if !errors.Is(err, tt.error) {
+				t.Errorf("error is worng, got '%T' want '%T'", err, tt.error)
+			}
+		})
+	}
 }
 
 func TestLogin(t *testing.T) {

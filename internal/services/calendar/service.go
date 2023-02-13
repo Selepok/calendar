@@ -28,12 +28,11 @@ func (s *Service) CreateUser(credentials http.Credentials) error {
 	if err != nil {
 		return err
 	}
-	s.repo.CreateUser(
+	return s.repo.CreateUser(
 		credentials.Login,
 		string(hashedPassword),
 		credentials.Timezone,
 	)
-	return nil
 }
 
 func (s *Service) Login(credentials model.Auth, jwt auth.Auth) (token string, err error) {

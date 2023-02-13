@@ -32,7 +32,6 @@ func NewRepository(dsn string) *Repository {
 
 func (repo Repository) CreateUser(login, password, timezone string) error {
 	if _, err := repo.db.Exec("INSERT INTO users VALUES ($1, $2, $3)", login, password, timezone); err != nil {
-		// If there is any issue with inserting into the database, return a 500 error
 		return err
 	}
 	return nil
