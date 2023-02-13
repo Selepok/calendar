@@ -10,7 +10,7 @@ import (
 //}
 // auth/auth.go
 
-func Auth(next http.Handler) http.Handler {
+func MiddlewareAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expirationMinutes, err := strconv.ParseInt(os.Getenv("TOKEN_EXPIRATION_TIME_IN_MINUTES"), 10, 64)
 		if err != nil {

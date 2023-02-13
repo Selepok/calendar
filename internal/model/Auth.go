@@ -1,18 +1,20 @@
 package model
 
-import "errors"
+import (
+	errors2 "github.com/Selepok/calendar/internal/errors"
+)
 
 type Auth struct {
-	Login    string
-	Password string
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 func (auth *Auth) OK() error {
-	if len(auth.Login) < 6 {
-		return errors.New("the length of the Login should be at least 6 symbols")
+	if len(auth.Login) == 0 {
+		return errors2.ErrMissingField("login")
 	}
-	if len(auth.Password) < 6 {
-		return errors.New("the length of the Password should be at least 6 symbols")
+	if len(auth.Password) == 0 {
+		return errors2.ErrMissingField("password")
 	}
 
 	return nil

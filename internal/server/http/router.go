@@ -12,7 +12,7 @@ func NewRouter(server *Server) *mux.Router {
 	router := mux.NewRouter()
 	router.Handle("/signup", http.HandlerFunc(server.HandlerA))
 	router.Handle("/login", http.HandlerFunc(server.Login))
-	router.Handle("/test", auth.Auth(http.HandlerFunc(server.Test)))
+	router.Handle("/test", auth.MiddlewareAuth(http.HandlerFunc(server.Test)))
 
 	return router
 }

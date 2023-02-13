@@ -10,6 +10,11 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+type Auth interface {
+	GenerateToken(string) (string, error)
+	ValidateToken(string) error
+}
+
 // JwtWrapper wraps the signing key and the issuer
 type JwtWrapper struct {
 	SecretKey         string

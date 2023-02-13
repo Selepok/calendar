@@ -2,6 +2,7 @@ package postgre
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"log"
@@ -30,7 +31,7 @@ func NewRepository(dsn string) *Repository {
 }
 
 func (repo Repository) CreateUser(login, password, timezone string) error {
-	if _, err := repo.db.Exec("insert into users values ($1, $2, $3)", login, password, timezone); err != nil {
+	if _, err := repo.db.Exec("INSERT INTO users VALUES ($1, $2, $3)", login, password, timezone); err != nil {
 		// If there is any issue with inserting into the database, return a 500 error
 		return err
 	}
@@ -38,11 +39,12 @@ func (repo Repository) CreateUser(login, password, timezone string) error {
 }
 
 func (repo Repository) GetUserHashedPassword(login string) (hashedPassword string, err error) {
-	// Get the existing entry present in the database for the given username
 	row := repo.db.QueryRow("SELECT password FROM users WHERE login=$1", login)
 
 	err = row.Scan(&hashedPassword)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return "", errors.New(fmt.Sprintf("There is no user with login: %s.", login))
+	} else if err != nil {
 		log.Println(err)
 		return
 	}
