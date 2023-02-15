@@ -1,4 +1,4 @@
-package calendar
+package user
 
 import (
 	errors2 "github.com/Selepok/calendar/internal/errors"
@@ -51,8 +51,4 @@ func (s *Service) Login(credentials model.Auth, jwt auth.Auth) (token string, er
 	}
 
 	return
-}
-
-func (s *Service) Logout(jwt auth.Auth) error {
-	return nil
 }

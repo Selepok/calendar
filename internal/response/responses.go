@@ -16,6 +16,10 @@ type Error struct {
 	Error string `json:"error"`
 }
 
+type Message struct {
+	Message string `json:"message"`
+}
+
 func Respond(w http.ResponseWriter, status int, data interface{}) {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(data); err != nil {

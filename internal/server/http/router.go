@@ -10,7 +10,7 @@ import (
 
 func NewRouter(server *Server) *mux.Router {
 	router := mux.NewRouter()
-	router.Handle("/signup", http.HandlerFunc(server.HandlerA))
+	router.Handle("/signup", http.HandlerFunc(server.CreateUser))
 	router.Handle("/login", http.HandlerFunc(server.Login))
 	router.Handle("/test", auth.MiddlewareAuth(http.HandlerFunc(server.Test)))
 

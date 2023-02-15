@@ -1,10 +1,10 @@
-package calendar
+package user
 
 import (
-	"errors"
 	errors2 "github.com/Selepok/calendar/internal/errors"
 	"github.com/Selepok/calendar/internal/model"
 	"github.com/Selepok/calendar/internal/server/http"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -85,6 +85,7 @@ func TestCreateUser(t *testing.T) {
 			error:    errors2.UserCreationIssue{},
 		},
 	}
+	assertion := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			creds := http.Credentials{
@@ -93,9 +94,7 @@ func TestCreateUser(t *testing.T) {
 				Timezone: tt.timezone,
 			}
 			err := service.CreateUser(creds)
-			if !errors.Is(err, tt.error) {
-				t.Errorf("error is worng, got '%T' want '%T'", err, tt.error)
-			}
+			assertion.Equalf(err, tt.error, "Test case: %s", tt.name)
 		})
 	}
 }
@@ -142,6 +141,7 @@ func TestLogin(t *testing.T) {
 			token:    correctToken,
 		},
 	}
+	assertion := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			user := model.Auth{
@@ -151,21 +151,8 @@ func TestLogin(t *testing.T) {
 
 			token, err := service.Login(user, jwt)
 
-			if token != tt.token {
-				t.Errorf("token is wrong, got %q want %q", token, tt.token)
-			}
-
-			if !errors.Is(err, tt.error) {
-				t.Errorf("error is worng, got '%T' want '%T'", err, tt.error)
-			}
+			assertion.Equalf(token, tt.token, "Test case: %s", tt.name)
+			assertion.Equalf(err, tt.error, "Test case: %s", tt.name)
 		})
 	}
 }
-
-//func TestLogout(t *testing.T) {
-//	repository := RepositoryMock{}
-//	service := Service{repository}
-//
-//	jwt := &JwtMock{}
-//	service.Logout(jwt)
-//}

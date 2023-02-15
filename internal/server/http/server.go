@@ -2,14 +2,13 @@ package http
 
 import (
 	"encoding/json"
+	"github.com/Selepok/calendar/internal/config"
 	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
 	"github.com/Selepok/calendar/internal/response"
 	"github.com/Selepok/calendar/internal/services/validator"
 	"io"
 	"net/http"
-	"os"
-	"strconv"
 )
 
 type Validator interface {
@@ -22,8 +21,9 @@ type Service interface {
 }
 
 type Server struct {
-	valid    Validator
-	calendar Service
+	valid  Validator
+	user   Service
+	config config.Application
 }
 
 type Credentials struct {
@@ -37,14 +37,11 @@ type Login struct {
 	Login    string `json:"login", db:"login"`
 }
 
-func NewServer(valid Validator, calendar Service) *Server {
-	return &Server{valid: valid, calendar: calendar}
+func NewServer(valid Validator, user Service, config config.Application) *Server {
+	return &Server{valid: valid, user: user, config: config}
 }
 
-func (s *Server) HandlerA(w http.ResponseWriter, r *http.Request) {
-	// TODO: unmarshall
-	// TODO: validate
-	// TODO call service
+func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	credentials := &Credentials{}
 	err := json.NewDecoder(r.Body).Decode(credentials)
 	if err != nil {
@@ -53,28 +50,28 @@ func (s *Server) HandlerA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.calendar.CreateUser(*credentials)
+	if err = s.user.CreateUser(*credentials); err != nil {
+		response.Respond(w, http.StatusUnauthorized, response.Error{Error: err.Error()})
+		return
+	}
+
+	response.Respond(w, http.StatusOK, response.Message{Message: "User has been created successfully."})
+	return
 }
 
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	user := model.Auth{}
-	err := s.valid.Validate(r.Body, &user)
-
-	if err != nil {
+	if err := s.valid.Validate(r.Body, &user); err != nil {
 		response.Respond(w, http.StatusBadRequest, response.Error{Error: err.Error()})
 		return
 	}
 
-	expirationMinutes, err := strconv.ParseInt(os.Getenv("TOKEN_EXPIRATION_TIME_IN_MINUTES"), 10, 64)
-	if err != nil {
-		return
-	}
 	jwt := &auth.JwtWrapper{
-		SecretKey:         os.Getenv("SECRET_KEY"),
-		ExpirationMinutes: expirationMinutes,
+		SecretKey:         s.config.SecretKey,
+		ExpirationMinutes: s.config.TokenExpirationDuration,
 	}
 
-	token, err := s.calendar.Login(user, jwt)
+	token, err := s.user.Login(user, jwt)
 	if err != nil {
 		response.Respond(w, http.StatusUnauthorized, response.Error{Error: err.Error()})
 		return
