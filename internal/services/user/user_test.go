@@ -2,66 +2,34 @@ package user
 
 import (
 	errors2 "github.com/Selepok/calendar/internal/errors"
+	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
-	"github.com/Selepok/calendar/internal/server/http"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 const (
 	correctUser       = "user"
-	correctHash       = "$2a$08$SLcWO3xeVzk0Z6.lNreRhuRf7YSeXT9RlfrVDBf96coxKbZYfobW6"
+	correctHash       = "$2a$08$.UdKqUQmZqdPm61PtDvKTuukViGD9Xn6Od1wK0RFkNnJwrfXL5IE."
 	correctPassword   = "testpassword"
 	correctToken      = "correct_token"
 	correctTimezone   = "Europe/Kyiv"
 	incorrectUser     = "incorrect"
 	incorrectPassword = "incorrect_password"
-	incorrectHash     = "$2a$08$SLcWO3xeVzk0Z6.lNreRhuRf7YSeXT9RlfrVDBf96coxKbZYfoeee"
+	incorrectHash     = "$2a$08$nnqKRvypmsZkzE4B3JQDB.5ajutXXQOVq73jDdLPgwN/Oq4RTrrrr"
 	tokenFailsUser    = "token_generating_fails"
 )
 
-type RepositoryMock struct {
-}
-
-func (r RepositoryMock) CreateUser(login, password, timezone string) error {
-	if login == correctUser && timezone == correctTimezone {
-		return nil
-	}
-
-	return errors2.UserCreationIssue{}
-}
-
-func (r RepositoryMock) GetUserHashedPassword(login string) (hashedPassword string, err error) {
-	switch login {
-	case correctUser, tokenFailsUser:
-		return correctHash, nil
-	case incorrectUser:
-		return incorrectHash, nil
-	default:
-		return "", errors2.NoUserFound(login)
-	}
-}
-
-type JwtMock struct {
-}
-
-func (jw *JwtMock) GenerateToken(login string) (tokenString string, err error) {
-	switch login {
-	case correctUser:
-		return correctToken, nil
-	case tokenFailsUser:
-		return tokenString, errors2.GenerateTokenIssue{}
-	default:
-		return
-	}
-}
-func (jw *JwtMock) ValidateToken(string) error {
-	return nil
-}
-
 func TestCreateUser(t *testing.T) {
-	repository := RepositoryMock{}
-	service := Service{repository}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repositoryMock := NewMockRepository(ctrl)
+	repositoryMock.EXPECT().CreateUser(correctUser, gomock.Any(), correctTimezone).Return(nil)
+	repositoryMock.EXPECT().CreateUser(incorrectUser, gomock.Any(), "").Return(errors2.UserCreationIssue{})
+
+	service := Service{repositoryMock}
 
 	tests := []struct {
 		name     string
@@ -88,22 +56,29 @@ func TestCreateUser(t *testing.T) {
 	assertion := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			creds := http.Credentials{
-				Password: tt.password,
-				Login:    tt.login,
-				Timezone: tt.timezone,
-			}
-			err := service.CreateUser(creds)
+			user := model.User{Login: tt.login, Password: tt.password, TimeZone: tt.timezone}
+
+			err := service.CreateUser(user)
 			assertion.Equalf(err, tt.error, "Test case: %s", tt.name)
 		})
 	}
 }
 
 func TestLogin(t *testing.T) {
-	repository := RepositoryMock{}
-	service := Service{repository}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	jwt := &JwtMock{}
+	repositoryMock := NewMockRepository(ctrl)
+	repositoryMock.EXPECT().GetUserHashedPassword(correctUser).Return(correctHash, nil)
+	repositoryMock.EXPECT().GetUserHashedPassword(tokenFailsUser).Return(correctHash, nil)
+	repositoryMock.EXPECT().GetUserHashedPassword(incorrectUser).Return(incorrectHash, nil)
+	repositoryMock.EXPECT().GetUserHashedPassword("").Return("", errors2.NoUserFound(""))
+
+	service := Service{repositoryMock}
+
+	tokenAuthMock := auth.NewMockTokenAuthentication(ctrl)
+	tokenAuthMock.EXPECT().GenerateToken(correctUser).Return(correctToken, nil)
+	tokenAuthMock.EXPECT().GenerateToken(tokenFailsUser).Return("", errors2.GenerateTokenIssue{})
 
 	tests := []struct {
 		name     string
@@ -149,7 +124,7 @@ func TestLogin(t *testing.T) {
 				Password: tt.password,
 			}
 
-			token, err := service.Login(user, jwt)
+			token, err := service.Login(user, tokenAuthMock)
 
 			assertion.Equalf(token, tt.token, "Test case: %s", tt.name)
 			assertion.Equalf(err, tt.error, "Test case: %s", tt.name)

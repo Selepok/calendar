@@ -11,10 +11,7 @@ type Repository struct {
 	db *sql.DB
 }
 
-type db interface {
-}
-
-func NewRepository(dsn string) *Repository {
+func NewUserRepository(dsn string) *Repository {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatal(err)

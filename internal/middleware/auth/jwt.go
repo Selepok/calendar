@@ -10,7 +10,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-type Auth interface {
+type TokenAuthentication interface {
 	GenerateToken(string) (string, error)
 	ValidateToken(string) error
 }

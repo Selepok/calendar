@@ -35,3 +35,9 @@ type GenerateTokenIssue struct {
 func (e GenerateTokenIssue) Error() string {
 	return "the error occurred while generating token"
 }
+
+type TimezoneNotValid string
+
+func (e TimezoneNotValid) Error() string {
+	return fmt.Sprintf("Invalid timezone: '%s'", string(e))
+}

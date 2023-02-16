@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"github.com/Selepok/calendar/internal/config"
 	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
@@ -16,8 +15,8 @@ type Validator interface {
 }
 
 type Service interface {
-	CreateUser(credentials Credentials) error
-	Login(model.Auth, auth.Auth) (string, error)
+	CreateUser(user model.User) error
+	Login(model.Auth, auth.TokenAuthentication) (string, error)
 }
 
 type Server struct {
@@ -42,15 +41,13 @@ func NewServer(valid Validator, user Service, config config.Application) *Server
 }
 
 func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
-	credentials := &Credentials{}
-	err := json.NewDecoder(r.Body).Decode(credentials)
-	if err != nil {
-		// If there is something wrong with the request body, return a 400 status
-		w.WriteHeader(http.StatusBadRequest)
+	user := model.User{}
+	if err := s.valid.Validate(r.Body, &user); err != nil {
+		response.Respond(w, http.StatusBadRequest, response.Error{Error: err.Error()})
 		return
 	}
 
-	if err = s.user.CreateUser(*credentials); err != nil {
+	if err := s.user.CreateUser(user); err != nil {
 		response.Respond(w, http.StatusUnauthorized, response.Error{Error: err.Error()})
 		return
 	}

@@ -4,7 +4,6 @@ import (
 	errors2 "github.com/Selepok/calendar/internal/errors"
 	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
-	"github.com/Selepok/calendar/internal/server/http"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,19 +21,19 @@ func NewService(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) CreateUser(credentials http.Credentials) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credentials.Password), 8)
+func (s *Service) CreateUser(user model.User) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
 	if err != nil {
 		return err
 	}
 	return s.repo.CreateUser(
-		credentials.Login,
+		user.Login,
 		string(hashedPassword),
-		credentials.Timezone,
+		user.TimeZone,
 	)
 }
 
-func (s *Service) Login(credentials model.Auth, jwt auth.Auth) (token string, err error) {
+func (s *Service) Login(credentials model.Auth, jwt auth.TokenAuthentication) (token string, err error) {
 	hashedPassword, err := s.repo.GetUserHashedPassword(credentials.Login)
 	if err != nil {
 		return
