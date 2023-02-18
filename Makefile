@@ -1,6 +1,7 @@
 SHALL=/bin/bash
 include .env
 export CGO_ENABLED=0
+export DSN=postgres://gouser:gopassword@127.0.0.1:5432/gotest?sslmode=disable
 
 default: build
 .PHONY: default

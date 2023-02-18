@@ -61,3 +61,17 @@ func (mr *MockRepositoryMockRecorder) GetUserHashedPassword(login interface{}) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserHashedPassword", reflect.TypeOf((*MockRepository)(nil).GetUserHashedPassword), login)
 }
+
+// Update mocks base method.
+func (m *MockRepository) Update(login, timezone string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", login, timezone)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockRepositoryMockRecorder) Update(login, timezone interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockRepository)(nil).Update), login, timezone)
+}

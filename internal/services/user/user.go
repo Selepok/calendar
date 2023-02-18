@@ -10,6 +10,7 @@ import (
 type Repository interface {
 	CreateUser(login, password, timezone string) error
 	GetUserHashedPassword(login string) (hashedPassword string, err error)
+	Update(login, timezone string) error
 }
 
 // Service holds calendar business logic and works with repository

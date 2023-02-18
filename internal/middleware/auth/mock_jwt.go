@@ -49,11 +49,12 @@ func (mr *MockTokenAuthenticationMockRecorder) GenerateToken(arg0 interface{}) *
 }
 
 // ValidateToken mocks base method.
-func (m *MockTokenAuthentication) ValidateToken(arg0 string) error {
+func (m *MockTokenAuthentication) ValidateToken(arg0 string) (Claims, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateToken", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(Claims)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ValidateToken indicates an expected call of ValidateToken.

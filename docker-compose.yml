@@ -25,5 +25,13 @@ services:
             POSTGRES_USER: gouser
             POSTGRES_PASSWORD: gopassword
 
+    migrate:
+        image: migrate/migrate
+        volumes:
+            - ./migrations:/migrations
+        command: [ "-path", "/migrations", "-database",  "postgres://gouser:gopassword@db:5432/gotest?sslmode=disable", "up", "4" ]
+        depends_on:
+            - db
+
 volumes:
   database-data:

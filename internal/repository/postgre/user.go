@@ -44,3 +44,10 @@ func (repo *Repository) GetUserHashedPassword(login string) (hashedPassword stri
 
 	return hashedPassword, nil
 }
+
+func (repo *Repository) Update(login, timezone string) error {
+	if _, err := repo.db.Exec("UPDATE users SET timezone = $2 WHERE login=$1", login, timezone); err != nil {
+		return err
+	}
+	return nil
+}

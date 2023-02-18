@@ -1,6 +1,7 @@
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
-    login text primary key,
-    password text,
-    timezone text
+    id       SERIAL PRIMARY KEY,
+    login    VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100),
+    timezone VARCHAR(50)
 );
