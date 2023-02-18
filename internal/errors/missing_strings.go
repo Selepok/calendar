@@ -41,3 +41,17 @@ type TimezoneNotValid string
 func (e TimezoneNotValid) Error() string {
 	return fmt.Sprintf("Invalid timezone: '%s'", string(e))
 }
+
+type InternalServerError struct {
+}
+
+func (e *InternalServerError) Error() string {
+	return "Something went wrong while processing Your request."
+}
+
+type AccessForbidden struct {
+}
+
+func (e *AccessForbidden) Error() string {
+	return "you have no access to that resource."
+}

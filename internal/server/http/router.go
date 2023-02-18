@@ -8,8 +8,9 @@ import (
 
 func NewRouter(server *Server) *mux.Router {
 	router := mux.NewRouter()
-	router.Handle("/signup", http.HandlerFunc(server.CreateUser))
-	router.Handle("/login", http.HandlerFunc(server.Login))
+	router.Handle("/signup", http.HandlerFunc(server.CreateUser)).Methods(http.MethodPost)
+	router.Handle("/login", http.HandlerFunc(server.Login)).Methods(http.MethodPost)
+	router.Handle("/api/user", auth.ValidateToken(http.HandlerFunc(server.UpdateUser))).Methods(http.MethodPut)
 	router.Handle("/test", auth.ValidateToken(http.HandlerFunc(server.Test)))
 
 	return router

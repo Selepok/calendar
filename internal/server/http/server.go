@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/Selepok/calendar/internal/config"
+	errors2 "github.com/Selepok/calendar/internal/errors"
 	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
 	"github.com/Selepok/calendar/internal/response"
@@ -15,8 +16,9 @@ type Validator interface {
 }
 
 type Service interface {
-	CreateUser(user model.User) error
-	Login(model.Auth, auth.TokenAuthentication) (string, error)
+	CreateUser(user model.CreateUser) error
+	Login(model.Login, auth.TokenAuthentication) (string, error)
+	Update(user model.User) error
 }
 
 type Server struct {
@@ -41,7 +43,7 @@ func NewServer(valid Validator, user Service, config config.Application) *Server
 }
 
 func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
-	user := model.User{}
+	user := model.CreateUser{}
 	if err := s.valid.Validate(r.Body, &user); err != nil {
 		response.Respond(w, http.StatusBadRequest, response.Error{Error: err.Error()})
 		return
@@ -57,7 +59,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
-	user := model.Auth{}
+	user := model.Login{}
 	if err := s.valid.Validate(r.Body, &user); err != nil {
 		response.Respond(w, http.StatusBadRequest, response.Error{Error: err.Error()})
 		return
@@ -75,6 +77,28 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.Respond(w, http.StatusOK, response.Token{Token: token})
+	return
+}
+
+func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	user := model.User{}
+	if err := s.valid.Validate(r.Body, &user); err != nil {
+		response.Respond(w, http.StatusBadRequest, response.Error{Error: err.Error()})
+		return
+	}
+
+	if user.Login != r.Header.Get("login") {
+		err := errors2.AccessForbidden{}
+		response.Respond(w, http.StatusForbidden, response.Error{Error: err.Error()})
+		return
+	}
+
+	if err := s.user.Update(user); err != nil {
+		response.Respond(w, http.StatusInternalServerError, response.Error{Error: err.Error()})
+		return
+	}
+
+	response.Respond(w, http.StatusOK, response.Message{Message: "User has been successfully updated."})
 	return
 }
 

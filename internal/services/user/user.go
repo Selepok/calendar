@@ -22,7 +22,7 @@ func NewService(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) CreateUser(user model.User) error {
+func (s *Service) CreateUser(user model.CreateUser) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 8)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (s *Service) CreateUser(user model.User) error {
 	)
 }
 
-func (s *Service) Login(credentials model.Auth, jwt auth.TokenAuthentication) (token string, err error) {
+func (s *Service) Login(credentials model.Login, jwt auth.TokenAuthentication) (token string, err error) {
 	hashedPassword, err := s.repo.GetUserHashedPassword(credentials.Login)
 	if err != nil {
 		return
@@ -51,4 +51,11 @@ func (s *Service) Login(credentials model.Auth, jwt auth.TokenAuthentication) (t
 	}
 
 	return
+}
+
+func (s *Service) Update(user model.User) error {
+	if err := s.repo.Update(user.Login, user.TimeZone); err != nil {
+		return &errors2.InternalServerError{}
+	}
+	return nil
 }

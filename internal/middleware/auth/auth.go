@@ -6,10 +6,6 @@ import (
 	"strconv"
 )
 
-func decodeLoginFromToken(token string) {
-
-}
-
 func ValidateToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expirationMinutes, err := strconv.ParseInt(os.Getenv("TOKEN_EXPIRATION_TIME_IN_MINUTES"), 10, 64)
@@ -28,12 +24,7 @@ func ValidateToken(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		w.Write([]byte(claims.Username))
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-		//r.
-		//
-		//if claims.Username !=
+		r.Header.Set("login", claims.Username)
 
 		next.ServeHTTP(w, r)
 	})
