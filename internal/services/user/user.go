@@ -11,6 +11,7 @@ type Repository interface {
 	CreateUser(login, password, timezone string) error
 	GetUserHashedPassword(login string) (hashedPassword string, err error)
 	Update(login, timezone string) error
+	GetUserIdByLogin(login string) (id int, err error)
 }
 
 // Service holds calendar business logic and works with repository

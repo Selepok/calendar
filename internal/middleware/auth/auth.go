@@ -8,6 +8,11 @@ import (
 
 func ValidateToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if len(r.Header.Get("Authorization")) == 0 {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("The Authorization header is empty"))
+			return
+		}
 		expirationMinutes, err := strconv.ParseInt(os.Getenv("TOKEN_EXPIRATION_TIME_IN_MINUTES"), 10, 64)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -18,13 +23,12 @@ func ValidateToken(next http.Handler) http.Handler {
 			ExpirationMinutes: expirationMinutes,
 		}
 
-		claims, err := jwt.ValidateToken(r.Header.Get("Authorization"))
+		err = jwt.ValidateToken(r.Header.Get("Authorization"))
 		if err != nil {
-			w.Write([]byte(err.Error()))
 			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(err.Error()))
 			return
 		}
-		r.Header.Set("login", claims.Username)
 
 		next.ServeHTTP(w, r)
 	})

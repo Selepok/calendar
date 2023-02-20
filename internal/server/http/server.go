@@ -6,6 +6,7 @@ import (
 	"github.com/Selepok/calendar/internal/middleware/auth"
 	"github.com/Selepok/calendar/internal/model"
 	"github.com/Selepok/calendar/internal/response"
+	"github.com/Selepok/calendar/internal/services/calendar"
 	"github.com/Selepok/calendar/internal/services/validator"
 	"io"
 	"net/http"
@@ -15,31 +16,21 @@ type Validator interface {
 	Validate(io.Reader, validator.Ok) error
 }
 
-type Service interface {
+type UserService interface {
 	CreateUser(user model.CreateUser) error
 	Login(model.Login, auth.TokenAuthentication) (string, error)
 	Update(user model.User) error
 }
 
 type Server struct {
-	valid  Validator
-	user   Service
-	config config.Application
+	valid    Validator
+	user     UserService
+	calendar calendar.Calendar
+	config   config.Application
 }
 
-type Credentials struct {
-	Password string `json:"password", db:"password"`
-	Login    string `json:"login", db:"login"`
-	Timezone string `json:"timezone", db:"timezone"`
-}
-
-type Login struct {
-	Password string `json:"password", db:"password"`
-	Login    string `json:"login", db:"login"`
-}
-
-func NewServer(valid Validator, user Service, config config.Application) *Server {
-	return &Server{valid: valid, user: user, config: config}
+func NewServer(valid Validator, user UserService, calendar calendar.Calendar, config config.Application) *Server {
+	return &Server{valid: valid, user: user, calendar: calendar, config: config}
 }
 
 func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +78,9 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Login != r.Header.Get("login") {
+	login := s.getLoginFromToken(r.Header.Get("Authorization"))
+
+	if user.Login != login {
 		err := errors2.AccessForbidden{}
 		response.Respond(w, http.StatusForbidden, response.Error{Error: err.Error()})
 		return
@@ -102,8 +95,30 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (s *Server) Test(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Good!"))
-	w.WriteHeader(http.StatusOK)
+func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
+	event := model.Event{}
+	if err := s.valid.Validate(r.Body, &event); err != nil {
+
+		response.Respond(w, http.StatusBadRequest, response.Error{Error: err.Error()})
+		return
+	}
+
+	login := s.getLoginFromToken(r.Header.Get("Authorization"))
+
+	if err := s.calendar.CreateEvent(event, login); err != nil {
+		response.Respond(w, http.StatusInternalServerError, response.Error{Error: err.Error()})
+		return
+	}
+
+	response.Respond(w, http.StatusOK, event)
+}
+
+func (s *Server) getLoginFromToken(token string) (login string) {
+	jwt := &auth.JwtWrapper{
+		SecretKey:         s.config.SecretKey,
+		ExpirationMinutes: s.config.TokenExpirationDuration,
+	}
+
+	login = jwt.GetLoginFromToken(token)
 	return
 }

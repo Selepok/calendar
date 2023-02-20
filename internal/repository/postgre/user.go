@@ -7,21 +7,12 @@ import (
 	"log"
 )
 
-type Repository struct {
-	db *sql.DB
+type UserRepository struct {
+	Repository
 }
 
-func NewUserRepository(dsn string) *Repository {
-	db, err := sql.Open("postgres", dsn)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err = db.Ping(); err != nil {
-		log.Fatal(err)
-	}
-
-	return &Repository{db}
+func NewUserRepository(db *sql.DB) *UserRepository {
+	return &UserRepository{Repository{db}}
 }
 
 func (repo *Repository) CreateUser(login, password, timezone string) error {
@@ -50,4 +41,18 @@ func (repo *Repository) Update(login, timezone string) error {
 		return err
 	}
 	return nil
+}
+
+func (repo *Repository) GetUserIdByLogin(login string) (id int, err error) {
+	row := repo.db.QueryRow("SELECT id FROM users WHERE login=$1", login)
+
+	err = row.Scan(&id)
+	if err == sql.ErrNoRows {
+		return id, errors2.NoUserFound(login)
+	} else if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
 }

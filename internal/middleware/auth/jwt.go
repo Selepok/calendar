@@ -12,7 +12,8 @@ type Claims struct {
 
 type TokenAuthentication interface {
 	GenerateToken(string) (string, error)
-	ValidateToken(string) (Claims, error)
+	ValidateToken(string) error
+	GetLoginFromToken(string) string
 }
 
 // JwtWrapper wraps the signing key and the issuer
@@ -46,9 +47,10 @@ func (jw *JwtWrapper) GenerateToken(login string) (tokenString string, err error
 	return
 }
 
-func (jw *JwtWrapper) ValidateToken(tokenString string) (claims Claims, err error) {
+func (jw *JwtWrapper) ValidateToken(tokenString string) (err error) {
 	var jwtKey = []byte(jw.SecretKey)
 
+	claims := Claims{}
 	_, err = jwt.ParseWithClaims(
 		tokenString,
 		&claims,
@@ -58,4 +60,19 @@ func (jw *JwtWrapper) ValidateToken(tokenString string) (claims Claims, err erro
 	)
 
 	return
+}
+
+func (jw *JwtWrapper) GetLoginFromToken(tokenString string) (login string) {
+	var jwtKey = []byte(jw.SecretKey)
+
+	claims := Claims{}
+	_, _ = jwt.ParseWithClaims(
+		tokenString,
+		&claims,
+		func(token *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		},
+	)
+
+	return claims.Username
 }
