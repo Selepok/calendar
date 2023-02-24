@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+//go:generate mockgen -destination=mock_repository.go -source=user.go -package=user
 const (
 	correctUser       = "user"
 	correctHash       = "$2a$08$.UdKqUQmZqdPm61PtDvKTuukViGD9Xn6Od1wK0RFkNnJwrfXL5IE."

@@ -6,14 +6,14 @@ import (
 )
 
 type Claims struct {
-	Username string
+	UserId int
 	jwt.RegisteredClaims
 }
 
 type TokenAuthentication interface {
-	GenerateToken(string) (string, error)
+	GenerateToken(int) (string, error)
 	ValidateToken(string) error
-	GetLoginFromToken(string) string
+	GetUserIdFromToken(string) int
 }
 
 // JwtWrapper wraps the signing key and the issuer
@@ -22,11 +22,11 @@ type JwtWrapper struct {
 	ExpirationMinutes int64
 }
 
-func (jw *JwtWrapper) GenerateToken(login string) (tokenString string, err error) {
+func (jw *JwtWrapper) GenerateToken(Userid int) (tokenString string, err error) {
 	expirationTime := time.Now().Add(time.Minute * time.Duration(jw.ExpirationMinutes))
 	// Create the JWT claims, which includes the username and expiry time
 	claims := &Claims{
-		Username: login,
+		UserId: Userid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -62,7 +62,7 @@ func (jw *JwtWrapper) ValidateToken(tokenString string) (err error) {
 	return
 }
 
-func (jw *JwtWrapper) GetLoginFromToken(tokenString string) (login string) {
+func (jw *JwtWrapper) GetUserIdFromToken(tokenString string) (id int) {
 	var jwtKey = []byte(jw.SecretKey)
 
 	claims := Claims{}
@@ -74,5 +74,5 @@ func (jw *JwtWrapper) GetLoginFromToken(tokenString string) (login string) {
 		},
 	)
 
-	return claims.Username
+	return claims.UserId
 }

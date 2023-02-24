@@ -12,6 +12,7 @@ func NewRouter(server *Server) *mux.Router {
 	router.Handle("/login", http.HandlerFunc(server.Login)).Methods(http.MethodPost)
 	router.Handle("/api/user", auth.ValidateToken(http.HandlerFunc(server.UpdateUser))).Methods(http.MethodPut)
 	router.Handle("/api/events", auth.ValidateToken(http.HandlerFunc(server.CreateEvent))).Methods(http.MethodPost)
+	router.Handle("/api/event/{id}", auth.ValidateToken(http.HandlerFunc(server.GetEvent))).Methods(http.MethodGet)
 
 	return router
 }

@@ -55,3 +55,15 @@ type AccessForbidden struct {
 func (e *AccessForbidden) Error() string {
 	return "you have no access to that resource."
 }
+
+type NoEventFound string
+
+func (e NoEventFound) Error() string {
+	return fmt.Sprintf("There is no event with id: %s.", string(e))
+}
+
+type IncorrectParam string
+
+func (e IncorrectParam) Error() string {
+	return fmt.Sprintf("Id param is incorrect: '%s'", string(e))
+}

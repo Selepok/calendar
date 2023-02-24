@@ -31,6 +31,7 @@ func (u *CreateUser) OK() (err error) {
 }
 
 type User struct {
+	Id       int
 	TimeZone string `json:"timezone"`
 	Login    string `json:"login"`
 	Password string `json:"password"`

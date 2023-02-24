@@ -9,8 +9,8 @@ import (
 
 type Repository interface {
 	CreateUser(login, password, timezone string) error
-	GetUserHashedPassword(login string) (hashedPassword string, err error)
-	Update(login, timezone string) error
+	GetUserHashedPassword(login string) (id int, hashedPassword string, err error)
+	Update(user model.User) error
 	GetUserIdByLogin(login string) (id int, err error)
 }
 
@@ -36,7 +36,7 @@ func (s *Service) CreateUser(user model.CreateUser) error {
 }
 
 func (s *Service) Login(credentials model.Login, jwt auth.TokenAuthentication) (token string, err error) {
-	hashedPassword, err := s.repo.GetUserHashedPassword(credentials.Login)
+	id, hashedPassword, err := s.repo.GetUserHashedPassword(credentials.Login)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (s *Service) Login(credentials model.Login, jwt auth.TokenAuthentication) (
 		return token, errors2.IncorrectPassword(credentials.Login)
 	}
 
-	token, err = jwt.GenerateToken(credentials.Login)
+	token, err = jwt.GenerateToken(id)
 	if err != nil {
 		return token, errors2.GenerateTokenIssue{}
 	}
@@ -54,8 +54,23 @@ func (s *Service) Login(credentials model.Login, jwt auth.TokenAuthentication) (
 	return
 }
 
-func (s *Service) Update(user model.User) error {
-	if err := s.repo.Update(user.Login, user.TimeZone); err != nil {
+//
+//func (s *Service) GetUserByLogin(login string) error {
+//	if err := s.repo.Update(user.Login, user.TimeZone); err != nil {
+//		return &errors2.InternalServerError{}
+//	}
+//	return nil
+//}
+
+func (s *Service) Update(user model.User) (err error) {
+	userId, err := s.repo.GetUserIdByLogin(user.Login)
+	if err != nil {
+		return
+	}
+	if userId != user.Id {
+		return &errors2.AccessForbidden{}
+	}
+	if err = s.repo.Update(user); err != nil {
 		return &errors2.InternalServerError{}
 	}
 	return nil

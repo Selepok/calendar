@@ -3,6 +3,7 @@ package postgre
 import (
 	"database/sql"
 	errors2 "github.com/Selepok/calendar/internal/errors"
+	"github.com/Selepok/calendar/internal/model"
 	_ "github.com/lib/pq"
 	"log"
 )
@@ -22,22 +23,22 @@ func (repo *Repository) CreateUser(login, password, timezone string) error {
 	return nil
 }
 
-func (repo *Repository) GetUserHashedPassword(login string) (hashedPassword string, err error) {
-	row := repo.db.QueryRow("SELECT password FROM users WHERE login=$1", login)
+func (repo *Repository) GetUserHashedPassword(login string) (id int, hashedPassword string, err error) {
+	row := repo.db.QueryRow("SELECT id, password FROM users WHERE login=$1", login)
 
-	err = row.Scan(&hashedPassword)
+	err = row.Scan(&id, &hashedPassword)
 	if err == sql.ErrNoRows {
-		return "", errors2.NoUserFound(login)
+		return id, hashedPassword, errors2.NoUserFound(login)
 	} else if err != nil {
 		log.Println(err)
 		return
 	}
 
-	return hashedPassword, nil
+	return id, hashedPassword, nil
 }
 
-func (repo *Repository) Update(login, timezone string) error {
-	if _, err := repo.db.Exec("UPDATE users SET timezone = $2 WHERE login=$1", login, timezone); err != nil {
+func (repo *Repository) Update(user model.User) error {
+	if _, err := repo.db.Exec("UPDATE users SET timezone = $2 WHERE id=$1", user.Id, user.TimeZone); err != nil {
 		return err
 	}
 	return nil

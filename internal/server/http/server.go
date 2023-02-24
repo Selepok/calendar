@@ -8,8 +8,10 @@ import (
 	"github.com/Selepok/calendar/internal/response"
 	"github.com/Selepok/calendar/internal/services/calendar"
 	"github.com/Selepok/calendar/internal/services/validator"
+	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type Validator interface {
@@ -29,6 +31,9 @@ type Server struct {
 	config   config.Application
 }
 
+// TODO: store user id in token string
+// TODO: add Logger middleware . Good example Zap
+// TODO: gorilla mux add middleware once
 func NewServer(valid Validator, user UserService, calendar calendar.Calendar, config config.Application) *Server {
 	return &Server{valid: valid, user: user, calendar: calendar, config: config}
 }
@@ -78,14 +83,9 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	login := s.getLoginFromToken(r.Header.Get("Authorization"))
+	user.Id = s.getUserIdFromToken(r.Header.Get("Authorization"))
 
-	if user.Login != login {
-		err := errors2.AccessForbidden{}
-		response.Respond(w, http.StatusForbidden, response.Error{Error: err.Error()})
-		return
-	}
-
+	// TODO: Add 403 error
 	if err := s.user.Update(user); err != nil {
 		response.Respond(w, http.StatusInternalServerError, response.Error{Error: err.Error()})
 		return
@@ -103,9 +103,9 @@ func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	login := s.getLoginFromToken(r.Header.Get("Authorization"))
+	event.UserId = s.getUserIdFromToken(r.Header.Get("Authorization"))
 
-	if err := s.calendar.CreateEvent(event, login); err != nil {
+	if err := s.calendar.CreateEvent(event); err != nil {
 		response.Respond(w, http.StatusInternalServerError, response.Error{Error: err.Error()})
 		return
 	}
@@ -113,12 +113,48 @@ func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	response.Respond(w, http.StatusOK, event)
 }
 
-func (s *Server) getLoginFromToken(token string) (login string) {
+func (s *Server) GetEvent(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		response.Respond(w, http.StatusBadRequest, response.Error{Error: errors2.IncorrectParam(params["id"]).Error()})
+		return
+	}
+
+	//login := s.getUserIdFromToken(use request
+	//r.Header.Get("Authorization"))
+
+	//if err := s.verifyUser(login); err != nil {
+	//	err := errors2.AccessForbidden{}
+	//	response.Respond(w, http.StatusForbidden, response.Error{Error: err.Error()})
+	//	return
+	//}
+	//user.Id = s.getUserIdFromToken(r.Header.Get("Authorization"))
+
+	event, err := s.calendar.GetEvent(id, s.getUserIdFromToken(r.Header.Get("Authorization")))
+	if err == errors2.NoEventFound(id) {
+		response.Respond(w, http.StatusNotFound, response.Error{Error: err.Error()})
+		return
+	}
+	if err != nil {
+		response.Respond(w, http.StatusInternalServerError, response.Error{Error: err.Error()})
+		return
+	}
+
+	response.Respond(w, http.StatusOK, event)
+}
+
+func (s *Server) getUserIdFromToken(token string) (userId int) {
 	jwt := &auth.JwtWrapper{
 		SecretKey:         s.config.SecretKey,
 		ExpirationMinutes: s.config.TokenExpirationDuration,
 	}
 
-	login = jwt.GetLoginFromToken(token)
+	userId = jwt.GetUserIdFromToken(token)
 	return
+}
+
+func (s *Server) verifyUser(login string) error {
+	//s.user.
+	return nil
 }
