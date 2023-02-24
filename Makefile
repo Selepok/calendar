@@ -30,3 +30,9 @@ migrate-down:
 	@ echo "-> running migration ..."
 	@ migrate -path ./migrations -database $(DSN) -verbose down
 .PHONY: migrate-down
+
+.PHONY: generate-mock
+generate-mock:  ## Generate mock files using mockgen. Should be installed
+	@ echo "Launching mocks code generating..."
+	@ go generate ./...
+	@ echo "Successfully finished"
