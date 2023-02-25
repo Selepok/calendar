@@ -31,7 +31,6 @@ type Server struct {
 	config   config.Application
 }
 
-// TODO: store user id in token string
 // TODO: add Logger middleware . Good example Zap
 // TODO: gorilla mux add middleware once
 func NewServer(valid Validator, user UserService, calendar calendar.Calendar, config config.Application) *Server {

@@ -10,6 +10,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+//go:generate mockgen -destination=mock_jwt.go -source=jwt.go -package=auth
 type TokenAuthentication interface {
 	GenerateToken(int) (string, error)
 	ValidateToken(string) error
